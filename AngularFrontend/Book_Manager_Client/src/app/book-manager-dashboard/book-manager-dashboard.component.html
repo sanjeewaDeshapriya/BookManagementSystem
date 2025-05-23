@@ -1,0 +1,178 @@
+<div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
+  
+  <header class="bg-slate-900/90 backdrop-blur-md px-8 py-4 flex justify-between items-center text-white shadow-xl border-b border-slate-700/50">
+    <div class="flex items-center text-2xl font-bold">
+      <span class="text-3xl mr-2">📚</span>
+      <span class="text-white">BookHub</span>
+    </div>
+    <div class="flex items-center gap-4">
+      <div class="relative">
+        <input 
+          type="text" 
+          placeholder="Search books..."
+          [(ngModel)]="searchTerm"
+          (input)="onSearch()"
+          class="pl-4 pr-10 py-2 rounded-lg bg-slate-800/80 text-white text-sm w-64 outline-none border border-slate-600/50 focus:border-blue-500 focus:bg-slate-800 transition-all duration-300 placeholder-slate-400">
+        <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400">🔍</span>
+      </div>
+      <button 
+        (click)="openAddModal()"
+        class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300">
+        <span class="text-lg mr-1">+</span> Add Book
+      </button>
+    </div>
+  </header>
+
+  <!-- Stats Cards -->
+  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-8 py-8 max-w-6xl mx-auto">
+    <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-6 flex items-center shadow-xl hover:shadow-2xl hover:bg-slate-800/80 transition-all duration-300">
+      <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-lg flex items-center justify-center text-xl mr-4 shadow-lg">
+        📚
+      </div>
+      <div class="flex-1">
+        <div class="text-slate-400 text-sm font-medium mb-1">Total Books</div>
+        <div class="text-2xl font-bold text-white">{{ totalBooks }}</div>
+      </div>
+    </div>
+    
+    <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-6 flex items-center shadow-xl hover:shadow-2xl hover:bg-slate-800/80 transition-all duration-300">
+      <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg flex items-center justify-center text-xl mr-4 shadow-lg">
+        👤
+      </div>
+      <div class="flex-1">
+        <div class="text-slate-400 text-sm font-medium mb-1">Unique Authors</div>
+        <div class="text-2xl font-bold text-white">{{ uniqueAuthors }}</div>
+      </div>
+    </div>
+    
+    <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-6 flex items-center shadow-xl hover:shadow-2xl hover:bg-slate-800/80 transition-all duration-300">
+      <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-500 rounded-lg flex items-center justify-center text-xl mr-4 shadow-lg">
+        📅
+      </div>
+      <div class="flex-1">
+        <div class="text-slate-400 text-sm font-medium mb-1">Last Added</div>
+        <div class="text-2xl font-bold text-white">{{ lastAddedYear }}</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- Book Collection Table -->
+  <div class="bg-slate-800/40 backdrop-blur border border-slate-700/50 mx-8 rounded-xl p-8 shadow-xl">
+    <h2 class="text-xl font-semibold text-white mb-6">Book Collection</h2>
+    
+    <div class="overflow-x-auto">
+      <table class="w-full bg-slate-800/30 rounded-lg overflow-hidden border border-slate-700/50">
+        <thead class="bg-slate-700/50 text-slate-300 border-b border-slate-600/50">
+          <tr>
+            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">BOOK ID</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">TITLE</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">AUTHOR</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">PUBLICATION DATE</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">ACTIONS</th>
+          </tr>
+        </thead>
+        <tbody class="divide-y divide-slate-700/30">
+          <tr *ngFor="let book of filteredBooks" class="hover:bg-slate-700/30 transition-all duration-300">
+            <td class="px-6 py-4 font-semibold text-blue-400">{{ book.id }}</td>
+            <td class="px-6 py-4 font-medium text-white">{{ book.title }}</td>
+            <td class="px-6 py-4 text-slate-300">{{ book.author }}</td>
+            <td class="px-6 py-4 text-slate-300">{{ formatDate(book.publicationDate) }}</td>
+            <td class="px-6 py-4">
+              <div class="flex gap-2">
+                <button 
+                  (click)="editBook(book)" 
+                  title="Edit"
+                  class="p-2 rounded-lg hover:bg-slate-600/50 hover:scale-110 transition-all duration-200 text-lg">
+                  ✏️
+                </button>
+                <button 
+                  (click)="deleteBook(book.id)" 
+                  title="Delete"
+                  class="p-2 rounded-lg hover:bg-red-500/20 hover:scale-110 transition-all duration-200 text-lg">
+                  🗑️
+                </button>
+              </div>
+            </td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <!-- Add Book Modal -->
+  <div 
+    *ngIf="showAddModal" 
+    (click)="closeAddModal()"
+    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div 
+      (click)="$event.stopPropagation()"
+      class="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-md shadow-2xl transform transition-all duration-300 animate-in slide-in-from-bottom-4">
+      <div class="bg-slate-700/50 text-white px-8 py-6 rounded-t-xl flex justify-between items-center border-b border-slate-600">
+        <h3 class="text-xl font-semibold">{{ isEditMode ? 'Edit Book' : 'Add New Book' }}</h3>
+        <button 
+          (click)="closeAddModal()"
+          class="w-8 h-8 rounded-lg hover:bg-slate-600/50 flex items-center justify-center text-2xl transition-colors duration-200 text-slate-300">
+          ×
+        </button>
+      </div>
+      
+      <div class="p-8 space-y-6">
+        <div *ngIf="errorMessage" class="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm">
+          {{ errorMessage }}
+        </div>
+        
+        <div *ngIf="isEditMode">
+          <label for="bookId" class="block text-sm font-medium text-slate-300 mb-2">Book ID</label>
+          <input 
+            type="text" 
+            id="bookId"
+            [(ngModel)]="newBook.id"
+            readonly
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/50 text-slate-400 focus:outline-none">
+        </div>
+        
+        <div>
+          <label for="bookTitle" class="block text-sm font-medium text-slate-300 mb-2">Title *</label>
+          <input 
+            type="text" 
+            id="bookTitle"
+            [(ngModel)]="newBook.title"
+            placeholder="Enter book title"
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/30 text-white focus:border-blue-500 focus:outline-none transition-colors duration-200 placeholder-slate-400">
+        </div>
+        
+        <div>
+          <label for="bookAuthor" class="block text-sm font-medium text-slate-300 mb-2">Author *</label>
+          <input 
+            type="text" 
+            id="bookAuthor"
+            [(ngModel)]="newBook.author"
+            placeholder="Enter author name"
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/30 text-white focus:border-blue-500 focus:outline-none transition-colors duration-200 placeholder-slate-400">
+        </div>
+        
+        <div>
+          <label for="publicationDate" class="block text-sm font-medium text-slate-300 mb-2">Publication Date *</label>
+          <input 
+            type="date" 
+            id="publicationDate"
+            [(ngModel)]="newBook.publicationDate"
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/30 text-white focus:border-blue-500 focus:outline-none transition-colors duration-200">
+        </div>
+      </div>
+      
+      <div class="px-8 py-6 border-t border-slate-600 flex justify-end gap-4">
+        <button 
+          (click)="closeAddModal()"
+          class="px-6 py-2 bg-slate-600/50 text-slate-300 rounded-lg hover:bg-slate-600/70 font-medium transition-colors duration-200">
+          Cancel
+        </button>
+        <button 
+          (click)="saveBook()"
+          class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg hover:from-blue-600 hover:to-blue-700 font-medium transition-all duration-200">
+          {{ isEditMode ? 'Update Book' : 'Save Book' }}
+        </button>
+      </div>
+    </div>
+  </div>
+</div>
