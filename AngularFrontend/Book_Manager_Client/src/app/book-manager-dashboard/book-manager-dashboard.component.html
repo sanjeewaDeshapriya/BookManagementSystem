@@ -1,21 +1,22 @@
 <div class="min-h-screen bg-gradient-to-br from-slate-900 via-slate-800 to-slate-900">
-  
+
+  <!-- Header -->
   <header class="bg-slate-900/90 backdrop-blur-md px-8 py-4 flex justify-between items-center text-white shadow-xl border-b border-slate-700/50">
     <div class="flex items-center text-2xl font-bold">
       <span class="text-3xl mr-2">📚</span>
-      <span class="text-white">BookHub</span>
+      <span class="text-white">BookHub Manager</span>
     </div>
     <div class="flex items-center gap-4">
       <div class="relative">
-        <input 
-          type="text" 
+        <input
+          type="text"
           placeholder="Search books..."
           [(ngModel)]="searchTerm"
           (input)="onSearch()"
           class="pl-4 pr-10 py-2 rounded-lg bg-slate-800/80 text-white text-sm w-64 outline-none border border-slate-600/50 focus:border-blue-500 focus:bg-slate-800 transition-all duration-300 placeholder-slate-400">
         <span class="absolute right-3 top-1/2 transform -translate-y-1/2 text-slate-400">🔍</span>
       </div>
-      <button 
+      <button
         (click)="openAddModal()"
         class="bg-gradient-to-r from-blue-500 to-blue-600 text-white px-6 py-2 rounded-lg font-semibold hover:shadow-lg hover:from-blue-600 hover:to-blue-700 transition-all duration-300">
         <span class="text-lg mr-1">+</span> Add Book
@@ -23,153 +24,350 @@
     </div>
   </header>
 
-  <!-- Stats Cards -->
-  <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-8 py-8 max-w-6xl mx-auto">
-    <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-6 flex items-center shadow-xl hover:shadow-2xl hover:bg-slate-800/80 transition-all duration-300">
-      <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-lg flex items-center justify-center text-xl mr-4 shadow-lg">
-        📚
-      </div>
-      <div class="flex-1">
-        <div class="text-slate-400 text-sm font-medium mb-1">Total Books</div>
-        <div class="text-2xl font-bold text-white">{{ totalBooks }}</div>
-      </div>
-    </div>
-    
-    <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-6 flex items-center shadow-xl hover:shadow-2xl hover:bg-slate-800/80 transition-all duration-300">
-      <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg flex items-center justify-center text-xl mr-4 shadow-lg">
-        👤
-      </div>
-      <div class="flex-1">
-        <div class="text-slate-400 text-sm font-medium mb-1">Unique Authors</div>
-        <div class="text-2xl font-bold text-white">{{ uniqueAuthors }}</div>
-      </div>
-    </div>
-    
-    <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-6 flex items-center shadow-xl hover:shadow-2xl hover:bg-slate-800/80 transition-all duration-300">
-      <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-500 rounded-lg flex items-center justify-center text-xl mr-4 shadow-lg">
-        📅
-      </div>
-      <div class="flex-1">
-        <div class="text-slate-400 text-sm font-medium mb-1">Last Added</div>
-        <div class="text-2xl font-bold text-white">{{ lastAddedYear }}</div>
-      </div>
+  <!-- Loading State -->
+  <div *ngIf="isLoading" class="flex items-center justify-center min-h-96">
+    <div class="text-white text-xl flex items-center">
+      <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-500 mr-3"></div>
+      Loading dashboard...
     </div>
   </div>
 
-  <!-- Book Collection Table -->
-  <div class="bg-slate-800/40 backdrop-blur border border-slate-700/50 mx-8 rounded-xl p-8 shadow-xl">
-    <h2 class="text-xl font-semibold text-white mb-6">Book Collection</h2>
-    
-    <div class="overflow-x-auto">
-      <table class="w-full bg-slate-800/30 rounded-lg overflow-hidden border border-slate-700/50">
-        <thead class="bg-slate-700/50 text-slate-300 border-b border-slate-600/50">
+  <!-- Error Message -->
+  <div *ngIf="errorMessage && !isLoading" class="mx-8 mt-8">
+    <div class="bg-red-500/20 border border-red-500/50 text-red-200 px-6 py-4 rounded-lg">
+      {{ errorMessage }}
+      <div class="mt-2 text-sm text-red-300">Using sample data for demonstration.</div>
+    </div>
+  </div>
+
+  <!-- Dashboard Content -->
+  <div *ngIf="!isLoading" class="p-8">
+
+    <!-- Stats Cards -->
+    <div class="grid grid-cols-1 md:grid-cols-3 gap-6 px-8 py-8 max-w-6xl mx-auto">
+      <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-6 flex items-center shadow-xl hover:shadow-2xl hover:bg-slate-800/80 transition-all duration-300">
+        <div class="w-12 h-12 bg-gradient-to-br from-orange-400 to-orange-500 rounded-lg flex items-center justify-center text-xl mr-4 shadow-lg">
+          📚
+        </div>
+        <div class="flex-1">
+          <div class="text-slate-400 text-sm font-medium mb-1">Total Books</div>
+          <div class="text-2xl font-bold text-white">{{ totalBooks }}</div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-6 flex items-center shadow-xl hover:shadow-2xl hover:bg-slate-800/80 transition-all duration-300">
+        <div class="w-12 h-12 bg-gradient-to-br from-blue-400 to-blue-500 rounded-lg flex items-center justify-center text-xl mr-4 shadow-lg">
+          👤
+        </div>
+        <div class="flex-1">
+          <div class="text-slate-400 text-sm font-medium mb-1">Unique Authors</div>
+          <div class="text-2xl font-bold text-white">{{ uniqueAuthors }}</div>
+        </div>
+      </div>
+
+      <div class="bg-slate-800/60 backdrop-blur border border-slate-700/50 rounded-xl p-6 flex items-center shadow-xl hover:shadow-2xl hover:bg-slate-800/80 transition-all duration-300">
+        <div class="w-12 h-12 bg-gradient-to-br from-green-400 to-green-500 rounded-lg flex items-center justify-center text-xl mr-4 shadow-lg">
+          📅
+        </div>
+        <div class="flex-1">
+          <div class="text-slate-400 text-sm font-medium mb-1">Last Added</div>
+          <div class="text-2xl font-bold text-white">{{ lastAddedYear }}</div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Three Widgets Grid -->
+    <div class="grid grid-cols-1 xl:grid-cols-3 gap-8 mb-8 px-8">
+
+      <!-- Widget 1: Table View - Latest 5 Books -->
+      <div class="bg-slate-800/40 backdrop-blur border border-slate-700/50 rounded-xl p-6 shadow-xl">
+        <div class="flex items-center mb-6">
+          <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center text-lg mr-3">
+            📋
+          </div>
+          <h2 class="text-xl font-semibold text-white">Latest 5 Books</h2>
+        </div>
+
+        <div class="overflow-x-auto">
+          <table class="w-full">
+            <thead>
+            <tr class="border-b border-slate-700/50">
+              <th class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider py-3">ID</th>
+              <th class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider py-3">Title</th>
+              <th class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider py-3">Author</th>
+              <th class="text-left text-xs font-semibold text-slate-400 uppercase tracking-wider py-3">ISBN</th>
+            </tr>
+            </thead>
+            <tbody class="divide-y divide-slate-700/30">
+            <tr *ngFor="let book of latestBooks" class="hover:bg-slate-700/30 transition-all duration-300">
+              <td class="py-4 font-semibold text-blue-400">#{{ book.id }}</td>
+              <td class="py-4 text-white font-medium" [title]="book.title">{{ book.title }}</td>
+              <td class="py-4 text-slate-300" [title]="book.author">{{ book.author }}</td>
+              <td class="py-4 text-slate-300">{{ book.isbn || 'N/A' }}</td>
+            </tr>
+            <tr *ngIf="latestBooks.length === 0">
+              <td colspan="4" class="py-8 text-center text-slate-400">No books available</td>
+            </tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Widget 2: List View - Oldest 10 Books -->
+      <div class="bg-slate-800/40 backdrop-blur border border-slate-700/50 rounded-xl p-6 shadow-xl">
+        <div class="flex items-center mb-6">
+          <div class="w-10 h-10 bg-gradient-to-br from-green-500 to-green-600 rounded-lg flex items-center justify-center text-lg mr-3">
+            📝
+          </div>
+          <h2 class="text-xl font-semibold text-white">Oldest 10 Books</h2>
+        </div>
+
+        <div class="space-y-3 h-80 overflow-y-auto">
+          <div *ngFor="let book of oldestBooks" class="bg-slate-700/30 rounded-lg p-4 hover:bg-slate-700/50 transition-all duration-200">
+            <div class="flex justify-between items-start mb-2">
+              <h3 class="font-semibold text-white text-sm" [title]="book.title">{{ book.title }}</h3>
+              <span class="text-xs text-blue-400 font-medium ml-2">#{{ book.id }}</span>
+            </div>
+            <div class="text-slate-300 text-sm mb-2" [title]="book.author">{{ book.author }}</div>
+            <div class="flex justify-between items-center text-xs">
+              <span class="text-slate-400">ISBN: {{ book.isbn || 'N/A' }}</span>
+              <span class="text-slate-400">{{ formatDate(book.publicationDate) }}</span>
+            </div>
+          </div>
+          <div *ngIf="oldestBooks.length === 0" class="text-center text-slate-400 py-8">
+            No books available
+          </div>
+        </div>
+      </div>
+
+      <!-- Widget 3: Custom Donut Chart - Books by Author -->
+      <div class="bg-slate-800/40 backdrop-blur border border-slate-700/50 rounded-xl p-6 shadow-xl">
+        <div class="flex items-center mb-6">
+          <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-purple-600 rounded-lg flex items-center justify-center text-lg mr-3">
+            📊
+          </div>
+          <h2 class="text-xl font-semibold text-white">Books by Author</h2>
+        </div>
+
+        <!-- Custom Tailwind Donut Chart -->
+        <div class="relative">
+          <div class="flex justify-center mb-4">
+            <div class="relative w-40 h-40">
+              <!-- Donut Chart Background -->
+              <svg class="w-40 h-40 transform -rotate-90" viewBox="0 0 100 100">
+                <!-- Background circle -->
+                <circle cx="50" cy="50" r="30" fill="none" stroke="rgb(51 65 85)" stroke-width="8"/>
+
+                <!-- Dynamic segments -->
+                <ng-container *ngFor="let author of authorBookCounts; let i = index">
+                  <circle
+                    cx="50"
+                    cy="50"
+                    r="30"
+                    fill="none"
+                    [attr.stroke]="getStrokeColor(author.color)"
+                    stroke-width="8"
+                    [attr.stroke-dasharray]="getStrokeDashArray(author.bookCount, i)"
+                    [attr.stroke-dashoffset]="getStrokeDashOffset(i)"
+                    class="transition-all duration-500"
+                    stroke-linecap="round">
+                  </circle>
+                </ng-container>
+              </svg>
+
+              <!-- Center text -->
+              <div class="absolute inset-0 flex items-center justify-center">
+                <div class="text-center">
+                  <div class="text-xl font-bold text-white">{{ totalBooks }}</div>
+                  <div class="text-xs text-slate-400">Books</div>
+                </div>
+              </div>
+            </div>
+          </div>
+
+          <!-- Legend -->
+          <div class="space-y-2 h-32 overflow-y-auto">
+            <div *ngFor="let authorCount of authorBookCounts" class="flex items-center justify-between py-1 px-2 rounded hover:bg-slate-700/30 transition-colors duration-200">
+              <div class="flex items-center space-x-2">
+                <div class="w-3 h-3 rounded-full" [ngClass]="authorCount.color"></div>
+                <span class="text-slate-300 text-sm" [title]="authorCount.author">{{ authorCount.author }}</span>
+              </div>
+              <div class="text-right">
+                <span class="text-white font-semibold text-sm">{{ authorCount.bookCount }}</span>
+                <span class="text-slate-400 text-xs ml-1">({{ getPercentage(authorCount.bookCount) }}%)</span>
+              </div>
+            </div>
+            <div *ngIf="authorBookCounts.length === 0" class="text-center text-slate-400 py-4 text-sm">
+              No author data available
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <!-- Full Book Collection Table -->
+    <div class="bg-slate-800/40 backdrop-blur border border-slate-700/50 mx-8 rounded-xl p-8 shadow-xl">
+      <h2 class="text-xl font-semibold text-white mb-6 flex items-center">
+        <span class="text-2xl mr-2">📖</span>
+        Complete Book Collection
+      </h2>
+
+      <div class="overflow-x-auto">
+        <table class="w-full bg-slate-800/30 rounded-lg overflow-hidden border border-slate-700/50">
+          <thead class="bg-slate-700/50 text-slate-300 border-b border-slate-600/50">
           <tr>
             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">BOOK ID</th>
             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">TITLE</th>
             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">AUTHOR</th>
+            <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">ISBN</th>
             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">PUBLICATION DATE</th>
             <th class="px-6 py-4 text-left text-xs font-semibold uppercase tracking-wider">ACTIONS</th>
           </tr>
-        </thead>
-        <tbody class="divide-y divide-slate-700/30">
+          </thead>
+          <tbody class="divide-y divide-slate-700/30">
           <tr *ngFor="let book of filteredBooks" class="hover:bg-slate-700/30 transition-all duration-300">
             <td class="px-6 py-4 font-semibold text-blue-400">{{ book.id }}</td>
             <td class="px-6 py-4 font-medium text-white">{{ book.title }}</td>
             <td class="px-6 py-4 text-slate-300">{{ book.author }}</td>
+            <td class="px-6 py-4 text-slate-300">{{ book.isbn || 'N/A' }}</td>
             <td class="px-6 py-4 text-slate-300">{{ formatDate(book.publicationDate) }}</td>
             <td class="px-6 py-4">
               <div class="flex gap-2">
-                <button 
-                  (click)="editBook(book)" 
-                  title="Edit"
-                  class="p-2 rounded-lg hover:bg-slate-600/50 hover:scale-110 transition-all duration-200 text-lg">
+                <button
+                  (click)="editBook(book)"
+                  title="Edit Book"
+                  class="p-2 rounded-lg hover:bg-blue-500/20 hover:scale-110 transition-all duration-200 text-lg">
                   ✏️
                 </button>
-                <button 
-                  (click)="deleteBook(book.id)" 
-                  title="Delete"
+                <button
+                  (click)="deleteBook(book.id)"
+                  title="Delete Book"
                   class="p-2 rounded-lg hover:bg-red-500/20 hover:scale-110 transition-all duration-200 text-lg">
                   🗑️
                 </button>
               </div>
             </td>
           </tr>
-        </tbody>
-      </table>
+          <tr *ngIf="filteredBooks.length === 0">
+            <td colspan="6" class="px-6 py-8 text-center text-slate-400">
+              <div class="flex flex-col items-center">
+                <span class="text-4xl mb-2">📚</span>
+                <span>No books found</span>
+                <span class="text-sm mt-1">Try adjusting your search criteria</span>
+              </div>
+            </td>
+          </tr>
+          </tbody>
+        </table>
+      </div>
     </div>
   </div>
 
-  <!-- Add Book Modal -->
-  <div 
-    *ngIf="showAddModal" 
+  <!-- Add/Edit Book Modal -->
+  <div
+    *ngIf="showAddModal"
     (click)="closeAddModal()"
-    class="fixed inset-0 bg-black/60 backdrop-blur-sm flex items-center justify-center z-50 p-4">
-    <div 
+    class="fixed inset-0 bg-black/70 backdrop-blur-sm flex items-center justify-center z-50 p-4">
+    <div
       (click)="$event.stopPropagation()"
-      class="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-md shadow-2xl transform transition-all duration-300 animate-in slide-in-from-bottom-4">
+      class="bg-slate-800 border border-slate-700 rounded-xl w-full max-w-md shadow-2xl transform transition-all duration-300">
+
+      <!-- Modal Header -->
       <div class="bg-slate-700/50 text-white px-8 py-6 rounded-t-xl flex justify-between items-center border-b border-slate-600">
-        <h3 class="text-xl font-semibold">{{ isEditMode ? 'Edit Book' : 'Add New Book' }}</h3>
-        <button 
+        <h3 class="text-xl font-semibold flex items-center">
+          <span class="text-2xl mr-2">{{ isEditMode ? '✏️' : '➕' }}</span>
+          {{ isEditMode ? 'Edit Book' : 'Add New Book' }}
+        </h3>
+        <button
           (click)="closeAddModal()"
-          class="w-8 h-8 rounded-lg hover:bg-slate-600/50 flex items-center justify-center text-2xl transition-colors duration-200 text-slate-300">
+          class="w-8 h-8 rounded-lg hover:bg-slate-600/50 flex items-center justify-center text-2xl transition-colors duration-200 text-slate-300 hover:text-white">
           ×
         </button>
       </div>
-      
+
+      <!-- Modal Body -->
       <div class="p-8 space-y-6">
-        <div *ngIf="errorMessage" class="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm">
+        <!-- Error Message -->
+        <div *ngIf="errorMessage" class="bg-red-500/20 border border-red-500/50 text-red-200 px-4 py-3 rounded-lg text-sm flex items-center">
+          <span class="text-lg mr-2">⚠️</span>
           {{ errorMessage }}
         </div>
-        
+
+        <!-- Book ID (only in edit mode) -->
         <div *ngIf="isEditMode">
           <label for="bookId" class="block text-sm font-medium text-slate-300 mb-2">Book ID</label>
-          <input 
-            type="text" 
+          <input
+            type="text"
             id="bookId"
             [(ngModel)]="newBook.id"
             readonly
-            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/50 text-slate-400 focus:outline-none">
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/50 text-slate-400 focus:outline-none cursor-not-allowed">
         </div>
-        
+
+        <!-- Title -->
         <div>
-          <label for="bookTitle" class="block text-sm font-medium text-slate-300 mb-2">Title *</label>
-          <input 
-            type="text" 
+          <label for="bookTitle" class="block text-sm font-medium text-slate-300 mb-2">
+            Title <span class="text-red-400">*</span>
+          </label>
+          <input
+            type="text"
             id="bookTitle"
             [(ngModel)]="newBook.title"
             placeholder="Enter book title"
-            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/30 text-white focus:border-blue-500 focus:outline-none transition-colors duration-200 placeholder-slate-400">
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/30 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 placeholder-slate-400">
         </div>
-        
+
+        <!-- Author -->
         <div>
-          <label for="bookAuthor" class="block text-sm font-medium text-slate-300 mb-2">Author *</label>
-          <input 
-            type="text" 
+          <label for="bookAuthor" class="block text-sm font-medium text-slate-300 mb-2">
+            Author <span class="text-red-400">*</span>
+          </label>
+          <input
+            type="text"
             id="bookAuthor"
             [(ngModel)]="newBook.author"
             placeholder="Enter author name"
-            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/30 text-white focus:border-blue-500 focus:outline-none transition-colors duration-200 placeholder-slate-400">
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/30 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 placeholder-slate-400">
         </div>
-        
+
+        <!-- ISBN -->
         <div>
-          <label for="publicationDate" class="block text-sm font-medium text-slate-300 mb-2">Publication Date *</label>
-          <input 
-            type="date" 
+          <label for="bookIsbn" class="block text-sm font-medium text-slate-300 mb-2">
+            ISBN
+            <span class="text-slate-500 text-xs ml-1">(optional)</span>
+          </label>
+          <input
+            type="text"
+            id="bookIsbn"
+            [(ngModel)]="newBook.isbn"
+            placeholder="Enter ISBN (e.g., 978-0-123456-78-9)"
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/30 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all duration-200 placeholder-slate-400">
+        </div>
+
+        <!-- Publication Date -->
+        <div>
+          <label for="publicationDate" class="block text-sm font-medium text-slate-300 mb-2">
+            Publication Date <span class="text-red-400">*</span>
+          </label>
+          <input
+            type="date"
             id="publicationDate"
             [(ngModel)]="newBook.publicationDate"
-            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/30 text-white focus:border-blue-500 focus:outline-none transition-colors duration-200">
+            class="w-full px-4 py-3 border border-slate-600 rounded-lg bg-slate-700/30 text-white focus:border-blue-500 focus:ring-2 focus:ring-blue-500/20 focus:outline-none transition-all duration-200">
         </div>
       </div>
-      
-      <div class="px-8 py-6 border-t border-slate-600 flex justify-end gap-4">
-        <button 
+
+      <!-- Modal Footer -->
+      <div class="px-8 py-6 border-t border-slate-600 flex justify-end gap-4 bg-slate-800/50 rounded-b-xl">
+        <button
           (click)="closeAddModal()"
-          class="px-6 py-2 bg-slate-600/50 text-slate-300 rounded-lg hover:bg-slate-600/70 font-medium transition-colors duration-200">
+          class="px-6 py-2 bg-slate-600/50 text-slate-300 rounded-lg hover:bg-slate-600/70 font-medium transition-all duration-200 hover:scale-105">
           Cancel
         </button>
-        <button 
+        <button
           (click)="saveBook()"
-          class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg hover:from-blue-600 hover:to-blue-700 font-medium transition-all duration-200">
+          class="px-6 py-2 bg-gradient-to-r from-blue-500 to-blue-600 text-white rounded-lg hover:shadow-lg hover:from-blue-600 hover:to-blue-700 font-medium transition-all duration-200 hover:scale-105 flex items-center">
+          <span class="mr-1">{{ isEditMode ? '💾' : '➕' }}</span>
           {{ isEditMode ? 'Update Book' : 'Save Book' }}
         </button>
       </div>
