@@ -16,6 +16,7 @@ namespace BookManagementSystem.Mapper
             {
                 Title = dto.Title,
                 Author = dto.Author,
+                Isbm = dto.Isbm,
                 PublicationDate = dto.PublicationDate
             };
         }
@@ -27,6 +28,7 @@ namespace BookManagementSystem.Mapper
             {
                 Title = entity.Title,
                 Author = entity.Author,
+                Isbm = entity.Isbm,
                 PublicationDate = entity.PublicationDate
             };
         }
@@ -38,6 +40,7 @@ namespace BookManagementSystem.Mapper
                 Id = entity.Id,
                 Title = entity.Title,
                 Author = entity.Author,
+                Isbm = entity.Isbm,
                 PublicationDate = entity.PublicationDate
             };
         }
@@ -47,6 +50,7 @@ namespace BookManagementSystem.Mapper
         {
             entity.Title = dto.Title;
             entity.Author = dto.Author;
+            entity.Isbm = dto.Isbm;
             entity.PublicationDate = dto.PublicationDate;
         }
     }
